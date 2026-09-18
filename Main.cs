@@ -148,7 +148,7 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate
                 var usedExamples = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                 // 1. Primary Translation Result
-                string targetDisplay = translation.TargetLanguage.ToLower() == "bn" ? "Bengali (বাংলা)" : translation.TargetLanguage.ToUpper();
+                string targetDisplay = string.Empty;
                 string subTitle = targetDisplay;
                 if (!string.IsNullOrWhiteSpace(translation.ExampleSentence))
                 {
@@ -164,7 +164,7 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate
                     ContextData = translation,
                     Action = e =>
                     {
-                        string url = $"https://translate.google.com/?sl={translation.DetectedSourceLanguage}&tl={translation.TargetLanguage}&text={Uri.EscapeDataString(parsed.Text)}&op=translate";
+                        string url = $"https://translate.google.com/details?sl={translation.DetectedSourceLanguage}&tl={translation.TargetLanguage}&text={Uri.EscapeDataString(parsed.Text)}&op=translate";
                         Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
                         return true;
                     },
