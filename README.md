@@ -2,10 +2,14 @@
 
 Google Translate plugin for PowerToys.
 
+![pic](Images/sample-pic.jpg)
+
+## Build
+- Install .NET from `aka.ms/dotnet/download`
+
 ## Install
-- Install .NET.
 - run build.bat
-- run install.ps1 with powershell (will put the files in %localAppData%\Microsoft\PowerToys\PowerToys Run\Plugins)
+- copy output/GoogleTranslate to `%localappdata%\Microsoft\PowerToys\PowerToys Run\Plugins\`
 
 
 ## Features
@@ -16,11 +20,11 @@ Google Translate plugin for PowerToys.
 - **In-Memory Caching**: Avoids repeated network queries for repeated terms.
 
 
-## Usage Examples
+## Usage
 
 | Query | What it does |
 |---|---|
-| `tr hello` | Translates "hello" into default target language (en) |
+| `tr apple` | Translates "apple" into target language (en) |
 | `tr good morning to es` | Translates "good morning" to Spanish (`es`) |
 | `tr wunderschön en` | Translates German "wunderschön" to English (`en`) |
 | `tr ありがとう` | Translates Japanese "arigatou" to English |
