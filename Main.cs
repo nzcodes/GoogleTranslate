@@ -80,7 +80,7 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate
                 results.Add(new Result
                 {
                     Title = "Google Translate",
-                    SubTitle = "Type 'tr <keyword>', 'tr hello', 'tr how are you'), or 'tr <text> to <lang>'",
+                    SubTitle = "Type 'tr <keyword>', 'tr hello', 'tr how are you'), or 'tr <text> in <lang>'",
                     IcoPath = _iconPath,
                     Action = _ => true,
                 });

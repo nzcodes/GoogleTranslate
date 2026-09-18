@@ -50,8 +50,8 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate.Services
                 return new ParsedQuery { Text = text, TargetLang = target, SourceLang = defaultSource };
             }
 
-            // Match "... to <lang>" e.g., "hello world to spanish" or "hello to es"
-            var toMatch = Regex.Match(input, @"^(.*?)\s+to\s+([a-zA-Z\-]{2,15})$", RegexOptions.IgnoreCase);
+            // Match "... in <lang>" e.g., "hello world in spanish" or "hello in es"
+            var toMatch = Regex.Match(input, @"^(.*?)\s+in\s+([a-zA-Z\-]{2,15})$", RegexOptions.IgnoreCase);
             if (toMatch.Success && !string.IsNullOrWhiteSpace(toMatch.Groups[1].Value))
             {
                 string text = toMatch.Groups[1].Value.Trim();
