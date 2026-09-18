@@ -1,0 +1,14 @@
+{
+  "ID": "D62B5780-6071-46EA-8CA5-A059C8EB2184",
+  "ActionKeyword": "tr",
+  "IsGlobal": false,
+  "Name": "Google Translate",
+  "Author": "Community",
+  "Version": "1.0.0",
+  "Language": "csharp",
+  "Website": "https://github.com/microsoft/PowerToys",
+  "ExecuteFileName": "Community.PowerToys.Run.Plugin.GoogleTranslate.dll",
+  "IcoPathDark": "Images/translate.dark.png",
+  "IcoPathLight": "Images/translate.light.png",
+  "Description": "Translate words and phrases using Google Translate in PowerToys Run"
+}
