@@ -6,11 +6,11 @@ Google Translate plugin for PowerToys.
 
 ## Build
 - Install .NET from `aka.ms/dotnet/download`
-
-## Install
 - run build.bat
 - copy output/GoogleTranslate to `%localappdata%\Microsoft\PowerToys\PowerToys Run\Plugins\`
 
+## Install
+- Download .rar from `Releases`
 
 ## Features
 - **Instant Translation**: Type `tr <word>` to translate into your default language (EN).
