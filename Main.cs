@@ -79,8 +79,8 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate
             {
                 results.Add(new Result
                 {
-                    Title = "Translate English to Bengali (বাংলা)",
-                    SubTitle = "Type 'tr <keyword>' (e.g., 'tr hello', 'tr how are you') or 'tr <text> to <lang>'",
+                    Title = "Google Translate",
+                    SubTitle = "Type 'tr <keyword>', 'tr hello', 'tr how are you'), or 'tr <text> to <lang>'",
                     IcoPath = _iconPath,
                     Action = _ => true,
                 });

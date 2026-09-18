@@ -8,4 +8,4 @@ coverage/
 !.env.example
 bin/
 obj/
-Output/
+GoogleTranslate/

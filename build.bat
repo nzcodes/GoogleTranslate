@@ -13,14 +13,14 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo Publishing plugin files to .\Output\GoogleTranslate ...
+echo Publishing plugin files to .\GoogleTranslate ...
 echo.
 
-if exist "Output" rd /s /q "Output"
+if exist "GoogleTranslate" rd /s /q "GoogleTranslate"
 
-dotnet publish -c Release -r win-x64 --self-contained false -o "Output\GoogleTranslate"
-if not exist "Output\GoogleTranslate\Images" mkdir "Output\GoogleTranslate\Images"
-xcopy /y /e "Images\*" "Output\GoogleTranslate\Images\" >nul 2>nul
+dotnet publish -c Release -r win-x64 --self-contained false -o "GoogleTranslate"
+if not exist "GoogleTranslate\Images" mkdir "GoogleTranslate\Images"
+xcopy /y /e "Images\*" "GoogleTranslate\Images\" >nul 2>nul
 
 if %errorlevel% equ 0 (
     rem Clean up intermediate bin directory to avoid duplicate folders
@@ -30,17 +30,16 @@ if %errorlevel% equ 0 (
     echo ================================================================
     echo [SUCCESS] Everything is extracted and ready!
     echo.
-    echo All files are placed in:
-    echo   %cd%\Output\GoogleTranslate\
+    echo All files are placed directly in:
+    echo   %cd%\GoogleTranslate\
     echo.
     echo Next step:
-    echo   1. Copy the "GoogleTranslate" folder from "Output"
+    echo   1. Copy the "GoogleTranslate" folder directly from root
     echo   2. Paste it into:
     echo      %%LOCALAPPDATA%%\Microsoft\PowerToys\PowerToys Run\Plugins\
     echo   3. Restart PowerToys
     echo ================================================================
     echo.
-    explorer "Output"
 ) else (
     echo.
     echo [FAILED] Compilation encountered errors.
