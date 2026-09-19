@@ -27,18 +27,9 @@ if %errorlevel% equ 0 (
     if exist "bin" rd /s /q "bin"
 
     echo.
-    echo ================================================================
     echo [SUCCESS] Everything is extracted and ready!
-    echo.
     echo All files are placed directly in:
     echo   %cd%\GoogleTranslate\
-    echo.
-    echo Next step:
-    echo   1. Copy the "GoogleTranslate" folder directly from root
-    echo   2. Paste it into:
-    echo      %%LOCALAPPDATA%%\Microsoft\PowerToys\PowerToys Run\Plugins\
-    echo   3. Restart PowerToys
-    echo ================================================================
     echo.
 ) else (
     echo.

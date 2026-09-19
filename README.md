@@ -12,6 +12,7 @@ Google Translate plugin for PowerToys.
 ## Install
 - Download .rar from `Releases`
 - Extract to `%localappdata%\Microsoft\PowerToys\PowerToys Run\Plugins\`
+- Restart PowerToys
 
 ## Features
 - **Instant Translation**: Type `tr <word>` to translate into your default language (EN).

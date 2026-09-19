@@ -223,6 +223,53 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate
                             });
                         }
                     }
+
+                    // 3. Add synonyms as additional results, ensuring no duplicates and no repetition of the original text
+                    var synonyms = (translation.Synonyms ?? Enumerable.Empty<string>())
+                        .Where(synonym => !string.IsNullOrWhiteSpace(synonym))
+                        .Where(synonym => !string.Equals(synonym, translation.OriginalText, StringComparison.OrdinalIgnoreCase))
+                        .Distinct(StringComparer.OrdinalIgnoreCase);
+
+                    const int maxSynonymTitleLength = 48;
+                    var synonymLines = new List<string>();
+                    var currentSynonyms = new List<string>();
+                    int currentLength = 0;
+
+                    foreach (var synonym in synonyms)
+                    {
+                        int separatorLength = currentSynonyms.Count == 0 ? 0 : 2;
+                        if (currentSynonyms.Count > 0 && currentLength + separatorLength + synonym.Length > maxSynonymTitleLength)
+                        {
+                            synonymLines.Add(string.Join(", ", currentSynonyms));
+                            currentSynonyms.Clear();
+                            currentLength = 0;
+                            separatorLength = 0;
+                        }
+
+                        currentSynonyms.Add(synonym);
+                        currentLength += separatorLength + synonym.Length;
+                    }
+
+                    if (currentSynonyms.Count > 0)
+                    {
+                        synonymLines.Add(string.Join(", ", currentSynonyms));
+                    }
+
+                    foreach (var synonymsTitle in synonymLines)
+                    {
+                        results.Add(new Result
+                        {
+                            Title = synonymsTitle,
+                            SubTitle = "Synonyms",
+                            IcoPath = _iconPath,
+                            ContextData = synonymsTitle,
+                            Action = _ =>
+                            {
+                                Clipboard.SetDataObject(synonymsTitle);
+                                return true;
+                            },
+                        });
+                    }
                 }
             }
             catch (OperationCanceledException)

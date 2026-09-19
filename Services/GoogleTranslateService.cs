@@ -65,7 +65,7 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate.Services
             // 2. FIX: Use 'client=dict-chrome-ex' instead of 'client=gtx' (which gets aggressively blocked with 429)
             // dt=ex and dt=md request example sentences and definitions
             string encodedText = Uri.EscapeDataString(cleanText);
-            string url = $"https://translate.googleapis.com/translate_a/single?client=dict-chrome-ex&sl={sourceLang}&tl={targetLang}&dt=t&dt=bd&dt=rm&dt=ex&dt=md&q={encodedText}";
+            string url = $"https://translate.googleapis.com/translate_a/single?client=dict-chrome-ex&sl={sourceLang}&tl={targetLang}&dt=t&dt=bd&dt=ss&dt=rm&dt=ex&dt=md&q={encodedText}";
 
             HttpResponseMessage response;
             try
@@ -81,7 +81,7 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate.Services
             if (response.StatusCode == (HttpStatusCode)429)
             {
                 // Fallback attempt with web client 'at' endpoint
-                string fallbackUrl = $"https://translate.google.com/translate_a/single?client=at&sl={sourceLang}&tl={targetLang}&dt=t&dt=bd&dt=rm&dt=ex&dt=md&q={encodedText}";
+                string fallbackUrl = $"https://translate.google.com/translate_a/single?client=at&sl={sourceLang}&tl={targetLang}&dt=t&dt=bd&dt=ss&dt=rm&dt=ex&dt=md&q={encodedText}";
                 HttpResponseMessage fallbackResponse;
                 try
                 {
@@ -128,6 +128,7 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate.Services
             string translatedText = string.Empty;
             string pronunciation = string.Empty;
             var dictEntries = new List<DictionaryEntry>();
+            var synonyms = new List<string>();
 
             // Sentences array: root[0]
             if (root.GetArrayLength() > 0 && root[0].ValueKind == JsonValueKind.Array)
@@ -185,6 +186,36 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate.Services
                 }
             }
 
+            // Google dictionary synonyms are returned by dt=ss at root[11].
+            if (root.GetArrayLength() > 11 && root[11].ValueKind == JsonValueKind.Array)
+            {
+                foreach (var synonymCategory in root[11].EnumerateArray())
+                {
+                    if (synonymCategory.ValueKind != JsonValueKind.Array || synonymCategory.GetArrayLength() < 2 ||
+                        synonymCategory[1].ValueKind != JsonValueKind.Array)
+                    {
+                        continue;
+                    }
+
+                    foreach (var synonymGroup in synonymCategory[1].EnumerateArray())
+                    {
+                        if (synonymGroup.ValueKind != JsonValueKind.Array || synonymGroup.GetArrayLength() == 0 ||
+                            synonymGroup[0].ValueKind != JsonValueKind.Array)
+                        {
+                            continue;
+                        }
+
+                        foreach (var synonym in synonymGroup[0].EnumerateArray())
+                        {
+                            if (synonym.ValueKind == JsonValueKind.String)
+                            {
+                                synonyms.Add(synonym.GetString());
+                            }
+                        }
+                    }
+                }
+            }
+
             // Ensure distinct example sentences across primary translation and all dictionary entries
             var assignedExamples = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (allExamples.Count > 0)
@@ -229,7 +260,8 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate.Services
                 DetectedSourceLanguage = detectedLang,
                 ExampleSentence = primaryExample,
                 AllExamples = allExamples,
-                DictionaryEntries = dictEntries
+                DictionaryEntries = dictEntries,
+                Synonyms = synonyms.Distinct(StringComparer.OrdinalIgnoreCase).ToList()
             };
         }
 
