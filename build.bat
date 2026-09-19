@@ -1,8 +1,5 @@
 @echo off
-echo ==============================================
 echo Building Google Translate for PowerToys Run
-echo Target: Bengali (bn), Source: English (en)
-echo ==============================================
 
 where dotnet >nul 2>nul
 if %errorlevel% neq 0 (
