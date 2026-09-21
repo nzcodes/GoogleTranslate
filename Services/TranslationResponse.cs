@@ -20,5 +20,6 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate.Services
         public string PartOfSpeech { get; set; } = string.Empty;
         public string ExampleSentence { get; set; } = string.Empty;
         public List<string> Terms { get; set; } = new List<string>();
+        public List<string> SourceSynonyms { get; set; } = new List<string>();
     }
 }

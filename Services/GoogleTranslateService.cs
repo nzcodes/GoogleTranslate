@@ -157,7 +157,64 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate.Services
                     if (entry.GetArrayLength() > 1 && entry[0].ValueKind == JsonValueKind.String)
                     {
                         string pos = entry[0].GetString();
-                        var dict = new DictionaryEntry
+
+                        if (entry.GetArrayLength() > 2 && entry[2].ValueKind == JsonValueKind.Array && entry[2].GetArrayLength() > 0)
+                        {
+                            foreach (var relatedGroup in entry[2].EnumerateArray())
+                            {
+                                if (relatedGroup.ValueKind != JsonValueKind.Array || relatedGroup.GetArrayLength() < 2)
+                                {
+                                    continue;
+                                }
+
+                                var dict = new DictionaryEntry
+                                {
+                                    PartOfSpeech = pos
+                                };
+
+                                if (entry[1].ValueKind == JsonValueKind.Array)
+                                {
+                                    foreach (var term in entry[1].EnumerateArray())
+                                    {
+                                        if (term.ValueKind == JsonValueKind.String)
+                                        {
+                                            dict.Terms.Add(term.GetString());
+                                        }
+                                    }
+                                }
+
+                                if (relatedGroup[1].ValueKind == JsonValueKind.Array)
+                                {
+                                    foreach (var sourceSynonym in relatedGroup[1].EnumerateArray())
+                                    {
+                                        if (sourceSynonym.ValueKind == JsonValueKind.String)
+                                        {
+                                            var cleaned = CleanHtml(sourceSynonym.GetString());
+                                            if (!string.IsNullOrWhiteSpace(cleaned))
+                                            {
+                                                dict.SourceSynonyms.Add(cleaned);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (!string.IsNullOrWhiteSpace(pos) &&
+                                    posExamples.TryGetValue(pos.Trim().ToLowerInvariant(), out var pList) &&
+                                    pList.Count > 0)
+                                {
+                                    dict.ExampleSentence = pList[0];
+                                }
+
+                                if (dict.Terms.Count > 0 || dict.SourceSynonyms.Count > 0)
+                                {
+                                    dictEntries.Add(dict);
+                                }
+                            }
+
+                            continue;
+                        }
+
+                        var fallbackDict = new DictionaryEntry
                         {
                             PartOfSpeech = pos
                         };
@@ -168,20 +225,22 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate.Services
                             {
                                 if (term.ValueKind == JsonValueKind.String)
                                 {
-                                    dict.Terms.Add(term.GetString());
+                                    fallbackDict.Terms.Add(term.GetString());
                                 }
                             }
                         }
 
-                        // Attach part-of-speech specific example sentence if found
-                        if (!string.IsNullOrWhiteSpace(pos) && 
-                            posExamples.TryGetValue(pos.Trim().ToLowerInvariant(), out var pList) && 
-                            pList.Count > 0)
+                        if (!string.IsNullOrWhiteSpace(pos) &&
+                            posExamples.TryGetValue(pos.Trim().ToLowerInvariant(), out var fallbackPList) &&
+                            fallbackPList.Count > 0)
                         {
-                            dict.ExampleSentence = pList[0];
+                            fallbackDict.ExampleSentence = fallbackPList[0];
                         }
 
-                        dictEntries.Add(dict);
+                        if (fallbackDict.Terms.Count > 0)
+                        {
+                            dictEntries.Add(fallbackDict);
+                        }
                     }
                 }
             }
@@ -215,6 +274,10 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate.Services
                     }
                 }
             }
+
+            var fallbackSynonyms = ExtractFallbackSynonyms(root, originalText, translatedText);
+            var combinedSynonyms = new List<string>(synonyms);
+            combinedSynonyms.AddRange(fallbackSynonyms);
 
             // Ensure distinct example sentences across primary translation and all dictionary entries
             var assignedExamples = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -261,8 +324,81 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate.Services
                 ExampleSentence = primaryExample,
                 AllExamples = allExamples,
                 DictionaryEntries = dictEntries,
-                Synonyms = synonyms.Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+                Synonyms = combinedSynonyms
+                    .Where(s => !string.IsNullOrWhiteSpace(s) &&
+                                !string.Equals(s, originalText, StringComparison.OrdinalIgnoreCase) &&
+                                !string.Equals(s, translatedText, StringComparison.OrdinalIgnoreCase))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList()
             };
+        }
+
+        private static List<string> ExtractFallbackSynonyms(JsonElement root, string originalText, string translatedText)
+        {
+            var synonyms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            void AddWord(string value)
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return;
+                }
+
+                string cleaned = CleanHtml(value).Trim();
+                if (string.IsNullOrWhiteSpace(cleaned))
+                {
+                    return;
+                }
+
+                if (string.Equals(cleaned, originalText, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(cleaned, translatedText, StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                synonyms.Add(cleaned);
+            }
+
+            if (root.GetArrayLength() > 1 && root[1].ValueKind == JsonValueKind.Array)
+            {
+                foreach (var entry in root[1].EnumerateArray())
+                {
+                    if (entry.ValueKind != JsonValueKind.Array || entry.GetArrayLength() < 3)
+                    {
+                        continue;
+                    }
+
+                    var relatedGroups = entry[2];
+                    if (relatedGroups.ValueKind != JsonValueKind.Array)
+                    {
+                        continue;
+                    }
+
+                    foreach (var relatedGroup in relatedGroups.EnumerateArray())
+                    {
+                        if (relatedGroup.ValueKind != JsonValueKind.Array || relatedGroup.GetArrayLength() < 2)
+                        {
+                            continue;
+                        }
+
+                        var relatedWords = relatedGroup[1];
+                        if (relatedWords.ValueKind != JsonValueKind.Array)
+                        {
+                            continue;
+                        }
+
+                        foreach (var relatedWord in relatedWords.EnumerateArray())
+                        {
+                            if (relatedWord.ValueKind == JsonValueKind.String)
+                            {
+                                AddWord(relatedWord.GetString());
+                            }
+                        }
+                    }
+                }
+            }
+
+            return synonyms.ToList();
         }
 
         private static (List<string> allExamples, Dictionary<string, List<string>> posExamples) ExtractExamples(JsonElement root)

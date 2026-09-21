@@ -144,133 +144,103 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate
                     return results;
                 }
 
-                // Track used example sentences to prevent repeating the same sentence across results
-                var usedExamples = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var sourceResults = new List<Result>();
+                var targetResults = new List<Result>();
+                var sourceWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                // 1. Primary Translation Result
-                string targetDisplay = string.Empty;
-                string subTitle = targetDisplay;
-                if (!string.IsNullOrWhiteSpace(translation.ExampleSentence))
-                {
-                    subTitle = translation.ExampleSentence;
-                    usedExamples.Add(translation.ExampleSentence);
-                }
-
-                results.Add(new Result
-                {
-                    Title = translation.TranslatedText,
-                    SubTitle = subTitle,
-                    IcoPath = _iconPath,
-                    ContextData = translation,
-                    Action = e =>
-                    {
-                        string url = $"https://translate.google.com/details?sl={translation.DetectedSourceLanguage}&tl={translation.TargetLanguage}&text={Uri.EscapeDataString(parsed.Text)}&op=translate";
-                        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-                        return true;
-                    },
-                });
-
-                // 2. Add other meanings of the typed word into the next results with distinct example sentences
                 if (translation.DictionaryEntries != null && translation.DictionaryEntries.Any())
                 {
                     foreach (var dict in translation.DictionaryEntries)
                     {
-                        var otherTerms = dict.Terms
-                            .Where(t => !string.Equals(t, translation.TranslatedText, StringComparison.OrdinalIgnoreCase))
-                            .Distinct()
+                        var sourceSynonyms = (dict.SourceSynonyms ?? new List<string>())
+                            .Where(s => !string.IsNullOrWhiteSpace(s))
+                            .Where(s => !string.Equals(s, translation.OriginalText, StringComparison.OrdinalIgnoreCase))
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .Take(8)
                             .ToList();
 
-                        if (otherTerms.Any())
+                        foreach (var word in sourceSynonyms)
                         {
-                            string termsJoined = string.Join(", ", otherTerms);
-
-                            // Select an unused example sentence, never repeating one already shown
-                            string synonymSubTitle = string.Empty;
-                            if (!string.IsNullOrWhiteSpace(dict.ExampleSentence) && !usedExamples.Contains(dict.ExampleSentence))
-                            {
-                                synonymSubTitle = dict.ExampleSentence;
-                            }
-                            else if (translation.AllExamples != null)
-                            {
-                                string nextUnused = translation.AllExamples.FirstOrDefault(ex => !string.IsNullOrWhiteSpace(ex) && !usedExamples.Contains(ex));
-                                if (!string.IsNullOrWhiteSpace(nextUnused))
-                                {
-                                    synonymSubTitle = nextUnused;
-                                }
-                            }
-
-                            if (!string.IsNullOrWhiteSpace(synonymSubTitle))
-                            {
-                                usedExamples.Add(synonymSubTitle);
-                            }
-                            else
-                            {
-                                // If no new distinct example is available, cleanly show target language without repeating
-                                synonymSubTitle = targetDisplay;
-                            }
-
-                            results.Add(new Result
-                            {
-                                Title = termsJoined,
-                                SubTitle = synonymSubTitle,
-                                IcoPath = _iconPath,
-                                ContextData = termsJoined,
-                                Action = _ =>
-                                {
-                                    Clipboard.SetDataObject(termsJoined);
-                                    return true;
-                                },
-                            });
-                        }
-                    }
-
-                    // 3. Add synonyms as additional results, ensuring no duplicates and no repetition of the original text
-                    var synonyms = (translation.Synonyms ?? Enumerable.Empty<string>())
-                        .Where(synonym => !string.IsNullOrWhiteSpace(synonym))
-                        .Where(synonym => !string.Equals(synonym, translation.OriginalText, StringComparison.OrdinalIgnoreCase))
-                        .Distinct(StringComparer.OrdinalIgnoreCase);
-
-                    const int maxSynonymTitleLength = 48;
-                    var synonymLines = new List<string>();
-                    var currentSynonyms = new List<string>();
-                    int currentLength = 0;
-
-                    foreach (var synonym in synonyms)
-                    {
-                        int separatorLength = currentSynonyms.Count == 0 ? 0 : 2;
-                        if (currentSynonyms.Count > 0 && currentLength + separatorLength + synonym.Length > maxSynonymTitleLength)
-                        {
-                            synonymLines.Add(string.Join(", ", currentSynonyms));
-                            currentSynonyms.Clear();
-                            currentLength = 0;
-                            separatorLength = 0;
+                            sourceWords.Add(word);
                         }
 
-                        currentSynonyms.Add(synonym);
-                        currentLength += separatorLength + synonym.Length;
-                    }
-
-                    if (currentSynonyms.Count > 0)
-                    {
-                        synonymLines.Add(string.Join(", ", currentSynonyms));
-                    }
-
-                    foreach (var synonymsTitle in synonymLines)
-                    {
-                        results.Add(new Result
+                        if (sourceSynonyms.Any())
                         {
-                            Title = synonymsTitle,
-                            SubTitle = "Synonyms",
-                            IcoPath = _iconPath,
-                            ContextData = synonymsTitle,
-                            Action = _ =>
+                            string subtitle = string.IsNullOrWhiteSpace(dict.ExampleSentence)
+                                ? (string.IsNullOrWhiteSpace(dict.PartOfSpeech) ? string.Empty : dict.PartOfSpeech)
+                                : string.IsNullOrWhiteSpace(dict.PartOfSpeech)
+                                    ? dict.ExampleSentence
+                                    : $"{dict.PartOfSpeech} - {dict.ExampleSentence}";
+
+                            var sourceTitle = string.Join(", ", sourceSynonyms);
+                            if (!sourceResults.Any(r => string.Equals(r.Title, sourceTitle, StringComparison.OrdinalIgnoreCase)))
                             {
-                                Clipboard.SetDataObject(synonymsTitle);
-                                return true;
-                            },
-                        });
+                                sourceResults.Add(new Result
+                                {
+                                    Title = sourceTitle,
+                                    SubTitle = subtitle,
+                                    IcoPath = _iconPath,
+                                    ContextData = sourceTitle,
+                                    Action = _ =>
+                                    {
+                                        Clipboard.SetDataObject(sourceTitle);
+                                        return true;
+                                    },
+                                });
+                            }
+                        }
+
+                        var blockedWords = new HashSet<string>(sourceWords, StringComparer.OrdinalIgnoreCase);
+                        var targetTerms = (dict.Terms ?? new List<string>())
+                            .Where(t => !string.IsNullOrWhiteSpace(t))
+                            .Where(t => !string.Equals(t, translation.TranslatedText, StringComparison.OrdinalIgnoreCase))
+                            .Where(t => !blockedWords.Contains(t))
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .Take(8)
+                            .ToList();
+
+                        if (targetTerms.Any())
+                        {
+                            var targetTitle = string.Join(", ", targetTerms);
+                            if (!targetResults.Any(r => string.Equals(r.Title, targetTitle, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                targetResults.Add(new Result
+                                {
+                                    Title = targetTitle,
+                                    SubTitle = string.Empty,
+                                    IcoPath = _iconPath,
+                                    ContextData = targetTitle,
+                                    Action = _ =>
+                                    {
+                                        Clipboard.SetDataObject(targetTitle);
+                                        return true;
+                                    },
+                                });
+                            }
+                        }
                     }
                 }
+
+                results.AddRange(sourceResults);
+
+                if (!targetResults.Any() && !string.IsNullOrWhiteSpace(translation.TranslatedText))
+                {
+                    results.Add(new Result
+                    {
+                        Title = translation.TranslatedText,
+                        SubTitle = string.Empty,
+                        IcoPath = _iconPath,
+                        ContextData = translation,
+                        Action = e =>
+                        {
+                            string url = $"https://translate.google.com/details?sl={translation.DetectedSourceLanguage}&tl={translation.TargetLanguage}&text={Uri.EscapeDataString(parsed.Text)}&op=translate";
+                            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                            return true;
+                        },
+                    });
+                }
+
+                results.AddRange(targetResults);
             }
             catch (OperationCanceledException)
             {

@@ -1,6 +1,4 @@
-# Google Translate for PowerToys Run
-
-Google Translate plugin for PowerToys.
+# Google Translate plugin for PowerToys Run
 
 ![pic](Images/sample-pic.jpg)
 
