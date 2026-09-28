@@ -3,13 +3,14 @@
 ![pic](Images/sample-pic.jpg)
 
 ## Build
-- Install .NET from `aka.ms/dotnet/download`
+- Install .NET SDK 10.0.401 from `aka.ms/dotnet/download`
 - run build.bat
-- copy `GoogleTranslate` to `%localappdata%\Microsoft\PowerToys\PowerToys Run\Plugins\`
+- gets copied to `%localappdata%\Microsoft\PowerToys\PowerToys Run\Plugins\GoogleTranslate`
+- Restart PowerToys
 
 ## Install
 - Download .rar from `Releases`
-- Extract to `%localappdata%\Microsoft\PowerToys\PowerToys Run\Plugins\`
+- Extract to `%localappdata%\Microsoft\PowerToys\PowerToys Run\Plugins\GoogleTranslate`
 - Restart PowerToys
 
 ## Features
