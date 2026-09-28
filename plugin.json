@@ -4,11 +4,11 @@
   "IsGlobal": false,
   "Name": "Google Translate",
   "Author": "Community",
-  "Version": "1.0.0",
+  "Version": "1.1.0",
   "Language": "csharp",
   "Website": "https://github.com/microsoft/PowerToys",
   "ExecuteFileName": "Community.PowerToys.Run.Plugin.GoogleTranslate.dll",
   "IcoPathDark": "Images/translate.dark.png",
   "IcoPathLight": "Images/translate.light.png",
-  "Description": "Translate words and phrases using Google Translate in PowerToys Run"
+  "Description": "Google Translate plugin for PowerToys Run. Shows definitions with example sentences, source language synonyms, and target language synonyms grouped by part of speech."
 }

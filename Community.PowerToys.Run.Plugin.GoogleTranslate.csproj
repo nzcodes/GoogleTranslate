@@ -1,30 +1,46 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>disable</Nullable>
     <AssemblyName>Community.PowerToys.Run.Plugin.GoogleTranslate</AssemblyName>
     <RootNamespace>Community.PowerToys.Run.Plugin.GoogleTranslate</RootNamespace>
-    <Version>1.0.1</Version>
-    <Authors>Community</Authors>
-    <Company>Community</Company>
-    <Description>Google Translate plugin for PowerToys Run (Fixed for 429 rate limits)</Description>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <Version>1.1.0</Version>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
 
-  <!-- PowerToys Run Plugin SDK / Dependencies -->
-  <ItemGroup>
-    <PackageReference Include="Community.PowerToys.Run.Plugin.Dependencies" Version="0.86.0" />
-  </ItemGroup>
+  <!-- PowerToys installation path for your system -->
+  <PropertyGroup>
+    <PowerToysDir Condition="Exists('$(LOCALAPPDATA)\PowerToys\PowerToys Run\Wox.Plugin.dll')">$(LOCALAPPDATA)\PowerToys\PowerToys Run</PowerToysDir>
+    <PowerToysDir Condition="'$(PowerToysDir)' == '' and Exists('$(LOCALAPPDATA)\PowerToys\Wox.Plugin.dll')">$(LOCALAPPDATA)\PowerToys</PowerToysDir>
+    <PowerToysDir Condition="'$(PowerToysDir)' == '' and Exists('$(LOCALAPPDATA)\Programs\PowerToys\PowerToys Run\Wox.Plugin.dll')">$(LOCALAPPDATA)\Programs\PowerToys\PowerToys Run</PowerToysDir>
+    <PowerToysDir Condition="'$(PowerToysDir)' == '' and Exists('C:\Program Files\PowerToys\PowerToys Run\Wox.Plugin.dll')">C:\Program Files\PowerToys\PowerToys Run</PowerToysDir>
+    <PowerToysDir Condition="'$(PowerToysDir)' == ''">$(LOCALAPPDATA)\PowerToys\PowerToys Run</PowerToysDir>
+  </PropertyGroup>
 
   <ItemGroup>
-    <None Update="plugin.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Content Include="Images\**">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <!-- System.Text.Json is included in the shared framework for .NET 10.0 -->
+  </ItemGroup>
+
+  <!-- References to PowerToys Core Assemblies -->
+  <ItemGroup>
+    <Reference Include="Wox.Plugin">
+      <HintPath>$(PowerToysDir)\Wox.Plugin.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PowerToys.ManagedCommon">
+      <HintPath>$(PowerToysDir)\PowerToys.ManagedCommon.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PowerToys.Settings.UI.Lib">
+      <HintPath>$(PowerToysDir)\PowerToys.Settings.UI.Lib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PowerToys.Common.UI">
+      <HintPath>$(PowerToysDir)\PowerToys.Common.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
 </Project>
