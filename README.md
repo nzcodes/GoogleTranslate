@@ -10,7 +10,7 @@
 
 ## Install
 - Download .rar from `Releases`
-- Extract to `%localappdata%\Microsoft\PowerToys\PowerToys Run\Plugins\GoogleTranslate`
+- Extract to `%localappdata%\Microsoft\PowerToys\PowerToys Run\Plugins\`
 - Restart PowerToys
 
 ## Features

@@ -145,8 +145,8 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate
                             ? (!string.IsNullOrWhiteSpace(def.PartOfSpeech) ? $"[{def.PartOfSpeech}] \"{def.Example}\"" : $"\"{def.Example}\"")
                             : (!string.IsNullOrWhiteSpace(def.PartOfSpeech) ? def.PartOfSpeech : "Definition");
                         
-                        string GetCircledNumber(int n) => n >= 1 && n <= 10 ? char.ConvertFromUtf32(0x2775 + n) : $"{n}.";
-                        string subtitle = $"{GetCircledNumber(defIndex)} {baseSubtitle}";
+                        string GetKeycapNumber(int n) => n >= 0 && n <= 9 ? $"{n}\uFE0F\u20E3" : $"{n}.";
+                        string subtitle = $"{GetKeycapNumber(defIndex)} {baseSubtitle}";
                         string defTitle = def.Definition;
 
                         results.Add(new Result
