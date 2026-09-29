@@ -144,8 +144,9 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate
                         string baseSubtitle = !string.IsNullOrWhiteSpace(def.Example)
                             ? (!string.IsNullOrWhiteSpace(def.PartOfSpeech) ? $"[{def.PartOfSpeech}] \"{def.Example}\"" : $"\"{def.Example}\"")
                             : (!string.IsNullOrWhiteSpace(def.PartOfSpeech) ? def.PartOfSpeech : "Definition");
-
-                        string subtitle = $"{defIndex}. {baseSubtitle}";
+                        
+                        string GetCircledNumber(int n) => n >= 1 && n <= 10 ? char.ConvertFromUtf32(0x2775 + n) : $"{n}.";
+                        string subtitle = $"{GetCircledNumber(defIndex)} {baseSubtitle}";
                         string defTitle = def.Definition;
 
                         results.Add(new Result
@@ -166,8 +167,7 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate
                         {
                             string synLine = string.Join(", ", def.Synonyms);
                             string synSubtitle = !string.IsNullOrWhiteSpace(def.PartOfSpeech)
-                                ? $"Synonyms ({def.PartOfSpeech}) #{defIndex}"
-                                : $"Synonyms #{defIndex}";
+                                ? $"Synonyms": $"Synonyms";
 
                             results.Add(new Result
                             {
@@ -198,7 +198,7 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate
                             results.Add(new Result
                             {
                                 Title = synLine,
-                                SubTitle = !string.IsNullOrWhiteSpace(pos) ? $"Synonyms ({pos})" : "Synonyms",
+                                SubTitle = !string.IsNullOrWhiteSpace(pos) ? $"Synonyms [{pos}]" : "Synonyms",
                                 IcoPath = _iconPath,
                                 ContextData = synLine,
                                 Action = _ =>
