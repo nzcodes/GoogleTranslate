@@ -340,19 +340,19 @@ namespace Community.PowerToys.Run.Plugin.GoogleTranslate
         {
             new PluginAdditionalOption()
             {
-                Key = nameof(Settings.DefaultTargetLanguage),
-                DisplayLabel = "Default Target Language Code",
-                DisplayDescription = "Language code to translate into (e.g., 'bn' for Bengali, 'es', 'fr', 'de', 'ja', 'hi')",
-                PluginOptionType = PluginAdditionalOption.AdditionalOptionType.Textbox,
-                TextValue = _settings?.DefaultTargetLanguage ?? "bn",
-            },
-            new PluginAdditionalOption()
-            {
                 Key = nameof(Settings.DefaultSourceLanguage),
-                DisplayLabel = "Default Source Language Code",
+                DisplayLabel = "Source Language Code",
                 DisplayDescription = "Source language code (e.g., 'en' for English, or 'auto')",
                 PluginOptionType = PluginAdditionalOption.AdditionalOptionType.Textbox,
                 TextValue = _settings?.DefaultSourceLanguage ?? "en",
+            },
+            new PluginAdditionalOption()
+            {
+                Key = nameof(Settings.DefaultTargetLanguage),
+                DisplayLabel = "Target Language Code",
+                DisplayDescription = "Language code to translate into (e.g., 'bn' for Bengali, 'es', 'fr', 'de', 'ja', 'hi')",
+                PluginOptionType = PluginAdditionalOption.AdditionalOptionType.Textbox,
+                TextValue = _settings?.DefaultTargetLanguage ?? "bn",
             },
             new PluginAdditionalOption()
             {
