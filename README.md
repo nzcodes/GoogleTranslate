@@ -3,9 +3,9 @@
 ![pic](Images/sample-pic.jpg)
 
 ## Build
+- git clone https://github.com/nzcodes/GoogleTranslate.git
 - Install .NET SDK 10.0.401 from `aka.ms/dotnet/download`
-- run build.bat
-- gets copied to `%localappdata%\Microsoft\PowerToys\PowerToys Run\Plugins\GoogleTranslate`
+- Run build.bat (gets copied to `%localappdata%\Microsoft\PowerToys\PowerToys Run\Plugins\GoogleTranslate`)
 - Restart PowerToys
 
 ## Install
@@ -27,6 +27,7 @@
 |---|---|
 | `tr apple` | Translates "apple" into target language (en) |
 | `tr good morning to es` | Translates "good morning" to Spanish (`es`) |
+| `tr bye in fr` | Translates "bye" in French (`fr`) |
 | `tr wunderschön en` | Translates German "wunderschön" to English (`en`) |
 | `tr ありがとう` | Translates Japanese "arigatou" to English |
 | `tr fr: how are you?` | Prefix syntax to translate into French |
